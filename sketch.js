@@ -44,15 +44,15 @@ let pointTopY = matrix_topY + matrixSquareWidth / 2;
 
 function nextState(matrix, matrixColumns, matrixRows) {
   const nextState = Array.from(
-    { length: matrixColumns },
-    () => Array(matrixRows).fill(0)
+    { length: matrixRows },
+    () => Array(matrixColumns).fill(0)
   );
 
   const xAdjacents = [-1, 1, 0];
   const yAdjacents = [-1, 1, 0];
 
-  for (let matrixY = 0; matrixY < matrixColumns; matrixY++) {
-    for (let matrixX = 0; matrixX < matrixRows; matrixX++) {
+  for (let matrixY = 0; matrixY < matrixRows; matrixY++) {
+    for (let matrixX = 0; matrixX < matrixColumns; matrixX++) {
       let currentAdjacentSquaresSum = 0;
 
       // Check neighboring cells
