@@ -10,6 +10,8 @@ An animated version of Conway's Game of Life in JavaScript, drawn with p5.js. Th
 
 I first wrote the core logic as an Exercism exercise, then ported it to JavaScript and added a p5.js front end to animate it. Living cells are drawn as green dots on a white grid. The grid size adapts to the screen, with about 32 cells along the shorter side of the window and as many rows and columns as fit along the longer side.
 
+Build notes: [how I went from an Exercism exercise to this simulation](NOTES.md)
+
 ## The rules
 
 Each cell is either alive or dead and looks at its eight neighbours:
