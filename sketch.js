@@ -4,18 +4,25 @@
  * Original concept and rules: John Horton Conway
  * JavaScript/p5.js implementation: @rishabkgautam
  *
- * The game area is 765 × 544 pixels.
- * Each cell is 17 × 17 pixels, creating a 45 × 32 cell matrix.
+ * The grid fills the whole window. The cell size is picked so that
+ * about 32 cells fit along the shorter side of the screen, and the
+ * number of rows and columns follows from the window size.
  *
- * Living cells are displayed in green with a 10-pixel stroke width.
- * To change the living-cell color, modify the `stroke()` value
- * under the "Draw current state" section.
+ * Living cells are displayed in green. To change the color, modify
+ * the `stroke()` value under the "living cells" section in draw().
  */
+
+
+const cellsOnShortSide = 32;
+
+let matrixRows, matrixColumns;
+let cellWidth, cellHeight;
+let matrix;
 
 
 // Randomly initialize the matrix.
 // Each cell has a 10% chance of being alive and a 90% chance of being dead.
-function createMatrix(rows, columns, livingProbability = 0.1) {
+function createRandomGrid(rows, columns, livingProbability = 0.1) {
   return Array.from({ length: rows }, () =>
     Array.from({ length: columns }, () =>
       Math.random() < 1 - livingProbability ? 0 : 1
@@ -24,26 +31,29 @@ function createMatrix(rows, columns, livingProbability = 0.1) {
 }
 
 
-// Matrix variables
+// Work out the grid size from the window size.
+// The matrix is only rebuilt when the number of rows or columns changes.
+function buildGrid() {
+  const cellSize = Math.max(
+    4,
+    Math.floor(Math.min(windowWidth, windowHeight) / cellsOnShortSide)
+  );
+  const columns = Math.floor(windowWidth / cellSize);
+  const rows = Math.floor(windowHeight / cellSize);
 
-const matrix_leftX = 300, matrix_topY = 100;
-const matrix_Width = 765, matrix_Height = 544;
-const matrixSquareWidth = 17;
-const matrixRows = Math.floor(matrix_Height / matrixSquareWidth);
-const matrixColumns = Math.floor(matrix_Width / matrixSquareWidth);
+  cellWidth = windowWidth / columns;
+  cellHeight = windowHeight / rows;
 
-// Creating matrix to hold the 0's or 1's for each matrix cell
-let matrix = createMatrix(matrixRows, matrixColumns);
-
-// Point (life cells) variables
-
-let pointLeftX = matrix_leftX + matrixSquareWidth / 2;
-let pointTopY = matrix_topY + matrixSquareWidth / 2;
+  if (columns !== matrixColumns || rows !== matrixRows) {
+    matrixColumns = columns;
+    matrixRows = rows;
+    matrix = createRandomGrid(rows, columns);
+  }
+}
 
 // The function to compute the next state
-
 function nextState(matrix, matrixColumns, matrixRows) {
-  const nextState = Array.from(
+  const newMatrix = Array.from(
     { length: matrixRows },
     () => Array(matrixColumns).fill(0)
   );
@@ -75,72 +85,64 @@ function nextState(matrix, matrixColumns, matrixRows) {
 
       // Calculate the cell's next value
       if (currentAdjacentSquaresSum === 3) {
-        nextState[matrixY][matrixX] = 1;
+        newMatrix[matrixY][matrixX] = 1;
       } else if (currentAdjacentSquaresSum === 2) {
-        nextState[matrixY][matrixX] = matrix[matrixY][matrixX];
+        newMatrix[matrixY][matrixX] = matrix[matrixY][matrixX];
       } else {
-        nextState[matrixY][matrixX] = 0;
+        newMatrix[matrixY][matrixX] = 0;
       }
     }
   }
 
-  return nextState;
+  return newMatrix;
 }
 
-
-// The update matrix function to updates the values from nextState function
-let next;
-
 function setup() {
-  createCanvas(windowWidth, windowHeight)
+  createCanvas(windowWidth, windowHeight);
+  buildGrid();
   frameRate(10);
   //describe("Implementation of Conway's Game of Life");
 }
 
-function draw() {
+function windowResized() {
+  resizeCanvas(windowWidth, windowHeight);
+  buildGrid();
+}
 
+function draw() {
   // Background Color
   background(0);
 
-
-  // vertical lines
+  // grid lines
   stroke('white');
   strokeWeight(1);
 
-  for(let lineX = 0; lineX <= matrix_Width; lineX += matrixSquareWidth){
-    line(matrix_leftX + lineX, matrix_topY, matrix_leftX + lineX, matrix_topY+ matrix_Height);
+  for (let col = 0; col <= matrixColumns; col++) {
+    const x = col * cellWidth;
+    line(x, 0, x, height);
   }
 
-  for(let lineY = 0; lineY <= matrix_Height; lineY += matrixSquareWidth){
-    line(matrix_leftX, matrix_topY + lineY, matrix_leftX + matrix_Width, matrix_topY + lineY);
+  for (let row = 0; row <= matrixRows; row++) {
+    const y = row * cellHeight;
+    line(0, y, width, y);
   }
 
-  // Define the draw current state function
+  // living cells
+  stroke('green');
+  strokeWeight(Math.min(cellWidth, cellHeight) * 0.6);
 
-  for (let pointsX = pointLeftX; pointsX < matrix_leftX + matrix_Width; pointsX += matrixSquareWidth) {
-    for (let pointsY = pointTopY; pointsY < matrix_topY + matrix_Height; pointsY += matrixSquareWidth) {
-
-      const pointMatrixRow = (pointsX - pointLeftX) / 17;
-      const pointMatrixColumn = (pointsY - pointTopY) / 17;
-
-
-      if (matrix[pointMatrixColumn][pointMatrixRow] === 1) {
-
-        stroke('green');
-        strokeWeight(10);
-        point(pointsX, pointsY);
+  for (let row = 0; row < matrixRows; row++) {
+    for (let col = 0; col < matrixColumns; col++) {
+      if (matrix[row][col] === 1) {
+        point(
+          col * cellWidth + cellWidth / 2,
+          row * cellHeight + cellHeight / 2
+        );
       }
     }
   }
 
-
   // make current state equal to next state
-  next = nextState(matrix, matrixColumns, matrixRows);
-
-  for (let row = 0; row < matrix.length; row++) {
-    for (let column = 0; column < matrix[row].length; column++) {
-      matrix[row][column] = next[row][column];
-    }
-  }
+  matrix = nextState(matrix, matrixColumns, matrixRows);
 
 }
