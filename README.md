@@ -1,6 +1,6 @@
 # Conway's Game of Life (p5.js)
 
-An animated version of Conway's Game of Life in JavaScript, drawn with p5.js.
+An animated version of Conway's Game of Life in JavaScript, drawn with p5.js. The grid fills the whole browser window, on desktop and on phones.
 
 ![Game of Life demo](assets/demo.gif)
 
@@ -8,7 +8,7 @@ An animated version of Conway's Game of Life in JavaScript, drawn with p5.js.
 
 ## About
 
-I first wrote the core logic as an Exercism exercise, then ported it to JavaScript and added a p5.js front end to animate it. The board is a 45 x 32 grid of 17 px cells (765 x 544 px). Living cells are drawn as green dots on a white grid.
+I first wrote the core logic as an Exercism exercise, then ported it to JavaScript and added a p5.js front end to animate it. Living cells are drawn as green dots on a white grid. The grid size adapts to the screen, with about 32 cells along the shorter side of the window and as many rows and columns as fit along the longer side.
 
 ## The rules
 
@@ -27,6 +27,7 @@ From these rules you get still lifes (blocks, beehives), oscillators, and moving
 - Each frame draws the current generation, then computes the next one from it into a separate matrix, so cells never see half-updated neighbours.
 - The simulation runs at 10 frames per second.
 - Cells outside the grid count as dead, so the edges are not wrapped around.
+- The layout is calculated from the window size. When you resize the window, the grid is redrawn to fit, and the board is only reset if the number of rows or columns changes.
 - Refresh the page to start again from a new random board.
 
 ## Run it locally
@@ -38,14 +39,15 @@ git clone https://github.com/rishabkgautam/game-of-life-p5.git
 cd game-of-life-p5
 ```
 
-Then open `index.html` in a browser. p5.js is loaded from a CDN, so you need an internet connection. The board is drawn at a fixed position, so use a window of roughly 1065 x 645 px or larger.
+Then open `index.html` in a browser. p5.js is loaded from a CDN, so you need an internet connection.
 
 ## Customising
 
 Everything lives in `sketch.js`:
 
-- Living-cell color: change the `stroke('green')` line in the draw loop
-- Starting density: change the `livingProbability` default in `createMatrix`
+- Grid density: change `cellsOnShortSide` (a bigger number gives smaller cells and more of them)
+- Living-cell color: change the `stroke('green')` line in the "living cells" section of `draw()`
+- Starting density: change the `livingProbability` default in `createRandomGrid`
 - Speed: change the number passed to `frameRate()` in `setup`
 
 ## Project structure
@@ -67,4 +69,4 @@ Based on the cellular automaton devised by John Horton Conway. The core logic wa
 
 ## License
 
-[MIT](./LICENCE)
+[MIT](./LICENSE)
